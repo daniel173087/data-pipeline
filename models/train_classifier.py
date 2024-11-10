@@ -57,7 +57,7 @@ def build_model():
     }
 
     # Create GridSearchCV object
-    cv = GridSearchCV(pipeline, param_grid=parameters, cv=2, verbose=3, n_jobs=-1)
+    cv = GridSearchCV(pipeline, param_grid=parameters, cv=2, verbose=3, n_jobs=1)
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):

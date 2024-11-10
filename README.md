@@ -1,5 +1,9 @@
 # Disaster Response Pipeline Project
 
+## Code functionality
+On my local machine any script runs correctly. I put photos of my Terminal in the folder 'for-mentor' for reference.
+I don't know what to change in order to run it on the machine of the mentor.
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
