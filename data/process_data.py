@@ -1,16 +1,52 @@
 import sys
-
+import pandas as pd
+from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
-    pass
-
+    """Load messages and categories datasets and merge them."""
+    # Load messages dataset
+    messages = pd.read_csv(messages_filepath)
+    
+    # Load categories dataset
+    categories = pd.read_csv(categories_filepath)
+    
+    # Merge datasets on 'id'
+    df = pd.merge(messages, categories, on='id')
+    return df
 
 def clean_data(df):
-    pass
-
+    """Clean the merged dataframe by splitting categories and removing duplicates."""
+    # Split 'categories' into separate columns
+    categories = df['categories'].str.split(';', expand=True)
+    
+    # Extract category names from the first row
+    row = categories.iloc[0]
+    category_colnames = row.apply(lambda x: x.split('-')[0])
+    categories.columns = category_colnames
+    
+    # Convert category values to binary (0 or 1)
+    for column in categories:
+        # Set each value to be the last character of the string
+        categories[column] = categories[column].astype(str).str[-1]
+        
+        # Convert column from string to numeric
+        categories[column] = pd.to_numeric(categories[column])
+    
+    # Drop the original 'categories' column from `df`
+    df.drop('categories', axis=1, inplace=True)
+    
+    # Concatenate original `df` with the new `categories` dataframe
+    df = pd.concat([df, categories], axis=1)
+    
+    # Remove duplicates
+    df = df.drop_duplicates()
+    
+    return df
 
 def save_data(df, database_filename):
-    pass  
+    """Save the clean dataset into an SQLite database."""
+    engine = create_engine(f'sqlite:///{database_filename}')
+    df.to_sql('df', engine, index=False, if_exists='replace')
 
 
 def main():

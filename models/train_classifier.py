@@ -1,25 +1,80 @@
 import sys
+import pandas as pd
+import joblib
+from sqlalchemy import create_engine
+import re
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 
+from sklearn.pipeline import Pipeline
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.metrics import accuracy_score, precision_score, recall_score, classification_report
+
+# Download necessary NLTK data
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('stopwords')
 
 def load_data(database_filepath):
-    pass
-
+    engine = create_engine(f'sqlite:///{database_filepath}')
+    df = pd.read_sql_table('df', engine)
+    X = df['message']
+    Y = df.iloc[:, 4:]
+    category_names = Y.columns.tolist()
+    return X, Y, category_names
 
 def tokenize(text):
-    pass
+    lemmatizer = WordNetLemmatizer()
 
+    # Normalize to lowercase and remove punctuation
+    text = text.lower()
+    text = re.sub(r"[^a-zA-Z0-9]", " ", text)
+
+    # Tokenize text and remove stop words
+    tokens = word_tokenize(text)
+    lemmatized_tokens = [lemmatizer.lemmatize(token) for token in tokens if token not in stopwords.words('english')]
+
+    return lemmatized_tokens
 
 def build_model():
-    pass
+    pipeline = Pipeline([
+        ('vect', CountVectorizer(tokenizer=tokenize)),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultiOutputClassifier(RandomForestClassifier()))
+    ])
 
+    # Define parameters for GridSearchCV
+    parameters = {
+        'vect__max_df': [0.75],
+        'vect__ngram_range': [(1, 1), (1, 2)],
+        'clf__estimator__n_estimators': [50],
+        'clf__estimator__min_samples_split': [2, 4]
+    }
+
+    # Create GridSearchCV object
+    cv = GridSearchCV(pipeline, param_grid=parameters, cv=2, verbose=3, n_jobs=-1)
+    return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
-    pass
-
+    Y_pred = model.predict(X_test)
+    for i, column in enumerate(category_names):
+        print(f"Metrics for {column}:")
+        accuracy = accuracy_score(Y_test[column], Y_pred[:, i])
+        precision = precision_score(Y_test[column], Y_pred[:, i], average='weighted', zero_division=0)
+        recall = recall_score(Y_test[column], Y_pred[:, i], average='weighted', zero_division=0)
+        print(f"  Accuracy: {accuracy:.4f}")
+        print(f"  Precision: {precision:.4f}")
+        print(f"  Recall: {recall:.4f}")
+        print(classification_report(Y_test[column], Y_pred[:, i]))
 
 def save_model(model, model_filepath):
-    pass
-
+    """Save the model as a pickle file."""
+    joblib.dump(model, model_filepath)
 
 def main():
     if len(sys.argv) == 3:
