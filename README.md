@@ -1,5 +1,8 @@
 # Disaster Response Pipeline Project
 
+### Summary
+This project shows the process of cleaning data and using this data in a pipeline. Data is used from Disaster Response Unit. These things then are added to a flask webpage to show interesting data and classify new text messages.‚
+
 ## Code structure
 .
 ├── .gitattributes
