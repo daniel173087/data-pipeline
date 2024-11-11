@@ -8,13 +8,22 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Pie
 from sqlalchemy import create_engine
 
 
 app = Flask(__name__)
 
 def tokenize(text):
+    '''
+    tokenize a given text into words
+
+    Input:
+    text the text which has to be tokenized
+
+    Output:
+    tokenized tokens
+    '''
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -41,6 +50,13 @@ def index():
     # extract data needed for visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
+    # calculate aid_related percentages
+    aid_related_counts = df['aid_related'].value_counts()
+    aid_related_labels = ['Aid Related', 'Not Aid Related']
+    aid_related_values = [
+        aid_related_counts[1] / aid_related_counts.sum() * 100,
+        aid_related_counts[0] / aid_related_counts.sum() * 100
+    ]
 
     # create visuals
     graphs = [
@@ -61,7 +77,19 @@ def index():
                     'title': "Genre"
                 }
             }
-        }
+        },
+        {
+            'data': [
+                Pie(
+                    labels=aid_related_labels,
+                    values=aid_related_values
+                )
+            ],
+            'layout': {
+                'title': 'Percentage of Aid Related vs. Not Aid Related Messages'
+            }
+    }
+
     ]
 
     # encode plotly graphs in JSON

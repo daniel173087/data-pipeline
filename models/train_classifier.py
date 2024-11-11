@@ -21,6 +21,17 @@ nltk.download('wordnet')
 nltk.download('stopwords')
 
 def load_data(database_filepath):
+    """
+    Load data from SQLite database.
+
+    Input:
+        database_filepath: filepath to SQLite database containing cleaned data.
+
+    Output:
+        X: a dataframe; Features dataset.
+        Y: a dataframe; Labels dataset.
+        category_names: List of label names.
+    """
     engine = create_engine(f'sqlite:///{database_filepath}')
     df = pd.read_sql_table('df', engine)
     X = df['message']
@@ -29,6 +40,15 @@ def load_data(database_filepath):
     return X, Y, category_names
 
 def tokenize(text):
+    """
+    Tokenize text data.
+
+    Input:
+        text: Text data to be tokenized.
+
+    Output:
+        lemmatized_tokens: List of cleaned and lemmatized tokens.
+    """
     lemmatizer = WordNetLemmatizer()
 
     # Normalize to lowercase and remove punctuation
@@ -42,6 +62,15 @@ def tokenize(text):
     return lemmatized_tokens
 
 def build_model():
+    """
+    Build a machine learning pipeline and perform grid search.
+
+    Input:
+    None
+
+    Output:
+        cv: GridSearchCV object. Grid search model object.
+    """
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
@@ -61,6 +90,18 @@ def build_model():
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Evaluate the model on a test set.
+
+    Input:
+        model: Trained model
+        X_test: dataframe. Test features
+        Y_test: dataframe. True labels for test set
+        category_names: list. List of category names
+
+    Output:
+        None
+    """
     Y_pred = model.predict(X_test)
     for i, column in enumerate(category_names):
         print(f"Metrics for {column}:")
@@ -73,7 +114,16 @@ def evaluate_model(model, X_test, Y_test, category_names):
         print(classification_report(Y_test[column], Y_pred[:, i]))
 
 def save_model(model, model_filepath):
-    """Save the model as a pickle file."""
+    """
+    Save the model as a pickle file.
+
+    Input:
+        model: Trained model to be saved
+        model_filepath: Filepath to save the model
+
+    Output:
+        None
+    """
     joblib.dump(model, model_filepath)
 
 def main():

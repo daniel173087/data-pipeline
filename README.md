@@ -1,8 +1,29 @@
 # Disaster Response Pipeline Project
 
-## Code functionality
-On my local machine any script runs correctly. I put photos of my Terminal in the folder 'for-mentor' for reference.
-I don't know what to change in order to run it on the machine of the mentor.
+## Code structure
+.
+├── .gitattributes
+├── .gitignore
+├── README.md
+├── app
+│   ├── run.py
+│   └── templates
+│       ├── go.html
+│       └── master.html
+├── data
+│   ├── ETL Pipeline Preparation.ipynb
+│   ├── ML Pipeline Preparation.ipynb
+│   ├── code_from_etl_notebook.py
+│   ├── disaster_categories.csv
+│   ├── disaster_messages.csv
+│   └── process_data.py
+├── for-mentor
+│   ├── process_data_output.png
+│   └── train_classifier_output.png
+└── models
+    ├── code_from_notebook.py
+    └── train_classifier.py
+
 
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
@@ -16,3 +37,7 @@ I don't know what to change in order to run it on the machine of the mentor.
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
+
+## Code functionality
+On my local machine any script runs correctly. I put photos of my Terminal in the folder 'for-mentor' for reference.
+I don't know what to change in order to run it on the machine of the mentor.
